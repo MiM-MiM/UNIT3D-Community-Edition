@@ -351,6 +351,7 @@ class GitUpdater extends Command
             if (\is_dir($concurrentDirectory)) {
                 return;
             }
+
             throw new \RuntimeException(\sprintf('Directory "%s" was not created', $concurrentDirectory));
         }
     }

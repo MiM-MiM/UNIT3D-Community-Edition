@@ -339,12 +339,13 @@ class ChatController extends Controller
         if (! $save) {
             $message->delete();
         }
-        if (!$save) {
+        if (! $save) {
             return \response('success');
         }
-        if (!$echo) {
+        if (! $echo) {
             return \response('success');
         }
+
         return new ChatMessageResource($message);
     }
 

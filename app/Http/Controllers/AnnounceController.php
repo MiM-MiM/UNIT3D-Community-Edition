@@ -366,6 +366,7 @@ class AnnounceController extends Controller
         if (\strtolower($queries['event']) === 'completed') {
             return;
         }
+
         throw new TrackerException(162, [':min' => self::MIN]);
     }
 

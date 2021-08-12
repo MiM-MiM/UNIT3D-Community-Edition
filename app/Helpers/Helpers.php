@@ -116,6 +116,7 @@ if (! function_exists('rating_color')) {
         if ($number > 10) {
             return;
         }
+
         return 'text-success';
     }
 }

@@ -1197,7 +1197,7 @@ class UserController extends Controller
                 if ($request->has('mvp_seeder') && $request->input('mvp_seeder') != null) {
                     $query->orWhereRaw('(history.active = 1 AND history.seedtime > (2592000 * 6) and history.seedtime < (2592000 * 12))', []);
                 }
-                if (!$request->has('legendary_seeder')) {
+                if (! $request->has('legendary_seeder')) {
                     return;
                 }
                 if ($request->input('legendary_seeder') == null) {
@@ -1445,7 +1445,7 @@ class UserController extends Controller
                 if ($request->has('satisfied') && $request->input('satisfied') != null) {
                     $query->orWhereRaw('(history.seedtime >= ? or history.immune = 1)', [\config('hitrun.seedtime')]);
                 }
-                if (!$request->has('notsatisfied')) {
+                if (! $request->has('notsatisfied')) {
                     return;
                 }
                 if ($request->input('notsatisfied') == null) {
@@ -1527,7 +1527,7 @@ class UserController extends Controller
                 if ($request->has('reseed') && $request->input('reseed') != null) {
                     $query->orWhereRaw('(torrents.seeders = ?) AND (torrents.leechers >= ?)', [0, 1]);
                 }
-                if (!$request->has('error')) {
+                if (! $request->has('error')) {
                     return;
                 }
                 if ($request->input('error') == null) {
@@ -1555,6 +1555,7 @@ class UserController extends Controller
             } else {
                 $table = $history->orderBy($sorting, $order)->paginate(50);
             }
+
             return \view('user.filters.uploads', [
                 'user'    => $user,
                 'uploads' => $table,
@@ -1601,6 +1602,7 @@ class UserController extends Controller
                 $history->where('immune', '=', 1);
             }
             $table = $history->where('history.user_id', '=', $user->id)->orderBy($sorting, $order)->paginate(50);
+
             return \view('user.filters.history', [
                 'user'    => $user,
                 'history' => $table,

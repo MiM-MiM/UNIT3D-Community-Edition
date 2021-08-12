@@ -59,10 +59,11 @@ trait Auditable
             if (empty($globalDiscards)) {
                 continue;
             }
-            if (!\in_array($key, $globalDiscards, true)) {
+            if (! \in_array($key, $globalDiscards, true)) {
                 continue;
             }
             unset($data[$key]);
+
             return $data;
         }
         // Return

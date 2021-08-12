@@ -63,6 +63,7 @@ class InviteController extends Controller
         if (\in_array($user->group->name, \config('other.invite_groups'), true)) {
             return \view('user.invite', ['user' => $user, 'route' => 'invite']);
         }
+
         return \redirect()->route('home.index')
             ->withErrors('Invites are currently disabled for your group.');
     }

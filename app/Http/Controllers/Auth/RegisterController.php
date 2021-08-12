@@ -56,6 +56,7 @@ class RegisterController extends Controller
         if (\config('other.invite-only') != 1) {
             return \view('auth.register', ['code' => $code]);
         }
+
         return \redirect()->route('login')
             ->withWarning(\trans('auth.allow-invite'));
     }

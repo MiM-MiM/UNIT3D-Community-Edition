@@ -155,7 +155,7 @@ class Comment extends Model
     {
         if (empty($ticket->reminded_at) || \strtotime($ticket->reminded_at) < \strtotime('+ 3 days')) {
             $last_comment = $ticket->comments()->orderBy('id', 'desc')->first();
-            if (!\property_exists($last_comment, 'id')) {
+            if (! \property_exists($last_comment, 'id')) {
                 return;
             }
             if ($last_comment->id === null) {

@@ -710,6 +710,7 @@ class Markdown
         if (\rtrim($Line['text'], \sprintf(' %s', $marker)) !== '') {
             return;
         }
+
         return [
             'element' => [
                 'name' => 'hr',
@@ -1221,12 +1222,13 @@ class Markdown
 
     protected function inlineEscapeSequence($Excerpt)
     {
-        if (!isset($Excerpt['text'][1])) {
+        if (! isset($Excerpt['text'][1])) {
             return;
         }
-        if (!\in_array($Excerpt['text'][1], $this->specialCharacters)) {
+        if (! \in_array($Excerpt['text'][1], $this->specialCharacters)) {
             return;
         }
+
         return [
             'element' => ['rawHtml' => $Excerpt['text'][1]],
             'extent'  => 2,
@@ -1359,9 +1361,10 @@ class Markdown
         if ($Excerpt['text'][1] === ' ') {
             return;
         }
-        if (!\preg_match('/^<\w[\w-]*+(?:[ ]*+'.$this->regexHtmlAttribute.')*+[ ]*+\/?>/s', $Excerpt['text'], $matches)) {
+        if (! \preg_match('/^<\w[\w-]*+(?:[ ]*+'.$this->regexHtmlAttribute.')*+[ ]*+\/?>/s', $Excerpt['text'], $matches)) {
             return;
         }
+
         return [
             'element' => ['rawHtml' => $matches[0]],
             'extent'  => \strlen($matches[0]),
@@ -1373,12 +1376,13 @@ class Markdown
         if (\substr($Excerpt['text'], 1, 1) === ' ') {
             return;
         }
-        if (!\str_contains($Excerpt['text'], ';')) {
+        if (! \str_contains($Excerpt['text'], ';')) {
             return;
         }
-        if (!\preg_match('#^&(#?+[0-9a-zA-Z]++);#', $Excerpt['text'], $matches)) {
+        if (! \preg_match('#^&(#?+[0-9a-zA-Z]++);#', $Excerpt['text'], $matches)) {
             return;
         }
+
         return [
             'element' => ['rawHtml' => '&'.$matches[1].';'],
             'extent'  => \strlen($matches[0]),
@@ -1393,9 +1397,10 @@ class Markdown
         if ($Excerpt['text'][1] !== '~') {
             return;
         }
-        if (!\preg_match('#^~~(?=\S)(.+?)(?<=\S)~~#', $Excerpt['text'], $matches)) {
+        if (! \preg_match('#^~~(?=\S)(.+?)(?<=\S)~~#', $Excerpt['text'], $matches)) {
             return;
         }
+
         return [
             'extent'  => \strlen($matches[0]),
             'element' => [

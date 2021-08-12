@@ -72,12 +72,13 @@ class TorrentTools
     public static function getFileCount($decodedTorrent)
     {
         // Multiple file torrent ?
-        if (!\array_key_exists('files', $decodedTorrent['info'])) {
+        if (! \array_key_exists('files', $decodedTorrent['info'])) {
             return 1;
         }
-        if (!(\is_countable($decodedTorrent['info']['files']) ? \count($decodedTorrent['info']['files']) : 0)) {
+        if (! (\is_countable($decodedTorrent['info']['files']) ? \count($decodedTorrent['info']['files']) : 0)) {
             return 1;
         }
+
         return \is_countable($decodedTorrent['info']['files']) ? \count($decodedTorrent['info']['files']) : 0;
     }
 
@@ -234,6 +235,7 @@ class TorrentTools
         if (\preg_match('#^(con|prn|aux|nul|com\d|lpt\d)(\..*)?$#i', $filename)) {
             return false;
         }
+
         return true;
     }
 }
