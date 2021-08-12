@@ -49,14 +49,15 @@ class RegisterController extends Controller
             return \redirect()->route('application.create')
                 ->withInfo(\trans('auth.allow-invite-appl'));
         }
-
         // Make sure open reg is off and invite code is not present
-        if ($code === 'null' && \config('other.invite-only') == 1) {
-            return \redirect()->route('login')
-                ->withWarning(\trans('auth.allow-invite'));
+        if ($code !== 'null') {
+            return \view('auth.register', ['code' => $code]);
         }
-
-        return \view('auth.register', ['code' => $code]);
+        if (\config('other.invite-only') != 1) {
+            return \view('auth.register', ['code' => $code]);
+        }
+        return \redirect()->route('login')
+            ->withWarning(\trans('auth.allow-invite'));
     }
 
     public function register(Request $request, $code = null)

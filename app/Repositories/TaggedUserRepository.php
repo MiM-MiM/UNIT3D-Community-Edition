@@ -101,13 +101,14 @@ class TaggedUserRepository
 
             return true;
         }
-
         // A single User object
-
-        if ($this->validate($users) && $users->acceptsNotification($sender, $users, 'mention', 'show_mention_'.$type.'_comment')) {
-            $users->notify(new NewCommentTag($type, $alias, $comment));
+        if (!$this->validate($users)) {
+            return true;
         }
-
+        if (!$users->acceptsNotification($sender, $users, 'mention', 'show_mention_'.$type.'_comment')) {
+            return true;
+        }
+        $users->notify(new NewCommentTag($type, $alias, $comment));
         return true;
     }
 
@@ -136,12 +137,14 @@ class TaggedUserRepository
 
             return true;
         }
-
         // A single User object
-        if ($this->validate($users) && $users->acceptsNotification($sender, $users, 'mention', 'show_mention_'.$type.'_post')) {
-            $users->notify(new NewPostTag($type, $alias, $post));
+        if (!$this->validate($users)) {
+            return true;
         }
-
+        if (!$users->acceptsNotification($sender, $users, 'mention', 'show_mention_'.$type.'_post')) {
+            return true;
+        }
+        $users->notify(new NewPostTag($type, $alias, $post));
         return true;
     }
 

@@ -53,8 +53,11 @@ class AlbumController extends Controller
     {
         $imdb = Str::startsWith($request->input('imdb'), 'tt') ? $request->input('imdb') : 'tt'.$request->input('imdb');
         $meta = Movie::where('imdb_id', '=', $imdb)->first();
-
-        if ($meta === null || ! $meta) {
+        if ($meta === null) {
+            return \redirect()->route('albums.create')
+                ->withErrors('Meta Data Not Found. Gallery System Is Being Refactored');
+        }
+        if (! $meta) {
             return \redirect()->route('albums.create')
                 ->withErrors('Meta Data Not Found. Gallery System Is Being Refactored');
         }

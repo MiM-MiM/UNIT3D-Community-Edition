@@ -361,10 +361,12 @@ class Markdown
 
     protected function blockComment($Line)
     {
-        if ($this->markupEscaped || $this->safeMode) {
+        if ($this->markupEscaped) {
             return;
         }
-
+        if ($this->safeMode) {
+            return;
+        }
         if (\str_starts_with($Line['text'], '<!--')) {
             $Block = [
                 'element' => [
@@ -702,14 +704,17 @@ class Markdown
     protected function blockRule($Line)
     {
         $marker = $Line['text'][0];
-
-        if (\substr_count($Line['text'], $marker) >= 3 && \rtrim($Line['text'], \sprintf(' %s', $marker)) === '') {
-            return [
-                'element' => [
-                    'name' => 'hr',
-                ],
-            ];
+        if (\substr_count($Line['text'], $marker) < 3) {
+            return;
         }
+        if (\rtrim($Line['text'], \sprintf(' %s', $marker)) !== '') {
+            return;
+        }
+        return [
+            'element' => [
+                'name' => 'hr',
+            ],
+        ];
     }
 
     //
@@ -717,10 +722,15 @@ class Markdown
 
     protected function blockSetextHeader($Line, array $Block = null)
     {
-        if (! isset($Block) || $Block['type'] !== 'Paragraph' || isset($Block['interrupted'])) {
+        if (! isset($Block)) {
             return;
         }
-
+        if ($Block['type'] !== 'Paragraph') {
+            return;
+        }
+        if (isset($Block['interrupted'])) {
+            return;
+        }
         if ($Line['indent'] < 4 && \rtrim(\rtrim($Line['text'], ' '), $Line['text'][0]) === '') {
             $Block['element']['name'] = $Line['text'][0] === '=' ? 'h1' : 'h2';
 
@@ -733,10 +743,12 @@ class Markdown
 
     protected function blockMarkup($Line)
     {
-        if ($this->markupEscaped || $this->safeMode) {
+        if ($this->markupEscaped) {
             return;
         }
-
+        if ($this->safeMode) {
+            return;
+        }
         if (\preg_match('/^<[\/]?+(\w*)(?:[ ]*+'.$this->regexHtmlAttribute.')*+[ ]*+(\/)?>/', $Line['text'], $matches)) {
             $element = \strtolower($matches[1]);
 
@@ -756,10 +768,12 @@ class Markdown
 
     protected function blockMarkupContinue($Line, array $Block)
     {
-        if (isset($Block['closed']) || isset($Block['interrupted'])) {
+        if (isset($Block['closed'])) {
             return;
         }
-
+        if (isset($Block['interrupted'])) {
+            return;
+        }
         $Block['element']['rawHtml'] .= "\n".$Line['body'];
 
         return $Block;
@@ -792,17 +806,22 @@ class Markdown
 
     protected function blockTable($Line, array $Block = null)
     {
-        if (! isset($Block) || $Block['type'] !== 'Paragraph' || isset($Block['interrupted'])) {
+        if (! isset($Block)) {
             return;
         }
-
-        if (
-            (! \str_contains($Block['element']['handler']['argument'], '|') && ! \str_contains($Line['text'], '|') && ! \str_contains($Line['text'],
-                    ':')) || \str_contains($Block['element']['handler']['argument'], "\n")
-        ) {
+        if ($Block['type'] !== 'Paragraph') {
             return;
         }
-
+        if (isset($Block['interrupted'])) {
+            return;
+        }
+        if (! \str_contains($Block['element']['handler']['argument'], '|') && ! \str_contains($Line['text'], '|') && ! \str_contains($Line['text'],
+                ':')) {
+            return;
+        }
+        if (\str_contains($Block['element']['handler']['argument'], "\n")) {
+            return;
+        }
         if (\rtrim($Line['text'], ' -:|') !== '') {
             return;
         }
@@ -1202,20 +1221,26 @@ class Markdown
 
     protected function inlineEscapeSequence($Excerpt)
     {
-        if (isset($Excerpt['text'][1]) && \in_array($Excerpt['text'][1], $this->specialCharacters)) {
-            return [
-                'element' => ['rawHtml' => $Excerpt['text'][1]],
-                'extent'  => 2,
-            ];
+        if (!isset($Excerpt['text'][1])) {
+            return;
         }
+        if (!\in_array($Excerpt['text'][1], $this->specialCharacters)) {
+            return;
+        }
+        return [
+            'element' => ['rawHtml' => $Excerpt['text'][1]],
+            'extent'  => 2,
+        ];
     }
 
     protected function inlineImage($Excerpt)
     {
-        if (! isset($Excerpt['text'][1]) || $Excerpt['text'][1] !== '[') {
+        if (! isset($Excerpt['text'][1])) {
             return;
         }
-
+        if ($Excerpt['text'][1] !== '[') {
+            return;
+        }
         $Excerpt['text'] = \substr($Excerpt['text'], 1);
 
         $Link = $this->inlineLink($Excerpt);
@@ -1309,10 +1334,15 @@ class Markdown
 
     protected function inlineMarkup($Excerpt)
     {
-        if ($this->markupEscaped || $this->safeMode || ! \str_contains($Excerpt['text'], '>')) {
+        if ($this->markupEscaped) {
             return;
         }
-
+        if ($this->safeMode) {
+            return;
+        }
+        if (! \str_contains($Excerpt['text'], '>')) {
+            return;
+        }
         if ($Excerpt['text'][1] === '/' && \preg_match('#^<\/\w[\w-]*+[ ]*+>#s', $Excerpt['text'], $matches)) {
             return [
                 'element' => ['rawHtml' => $matches[0]],
@@ -1326,24 +1356,33 @@ class Markdown
                 'extent'  => \strlen($matches[0]),
             ];
         }
-
-        if ($Excerpt['text'][1] !== ' ' && \preg_match('/^<\w[\w-]*+(?:[ ]*+'.$this->regexHtmlAttribute.')*+[ ]*+\/?>/s', $Excerpt['text'], $matches)) {
-            return [
-                'element' => ['rawHtml' => $matches[0]],
-                'extent'  => \strlen($matches[0]),
-            ];
+        if ($Excerpt['text'][1] === ' ') {
+            return;
         }
+        if (!\preg_match('/^<\w[\w-]*+(?:[ ]*+'.$this->regexHtmlAttribute.')*+[ ]*+\/?>/s', $Excerpt['text'], $matches)) {
+            return;
+        }
+        return [
+            'element' => ['rawHtml' => $matches[0]],
+            'extent'  => \strlen($matches[0]),
+        ];
     }
 
     protected function inlineSpecialCharacter($Excerpt)
     {
-        if (\substr($Excerpt['text'], 1, 1) !== ' ' && \str_contains($Excerpt['text'], ';') && \preg_match('#^&(#?+[0-9a-zA-Z]++);#', $Excerpt['text'], $matches)
-        ) {
-            return [
-                'element' => ['rawHtml' => '&'.$matches[1].';'],
-                'extent'  => \strlen($matches[0]),
-            ];
+        if (\substr($Excerpt['text'], 1, 1) === ' ') {
+            return;
         }
+        if (!\str_contains($Excerpt['text'], ';')) {
+            return;
+        }
+        if (!\preg_match('#^&(#?+[0-9a-zA-Z]++);#', $Excerpt['text'], $matches)) {
+            return;
+        }
+        return [
+            'element' => ['rawHtml' => '&'.$matches[1].';'],
+            'extent'  => \strlen($matches[0]),
+        ];
     }
 
     protected function inlineStrikethrough($Excerpt)
@@ -1351,28 +1390,36 @@ class Markdown
         if (! isset($Excerpt['text'][1])) {
             return;
         }
-
-        if ($Excerpt['text'][1] === '~' && \preg_match('#^~~(?=\S)(.+?)(?<=\S)~~#', $Excerpt['text'], $matches)) {
-            return [
-                'extent'  => \strlen($matches[0]),
-                'element' => [
-                    'name'    => 'del',
-                    'handler' => [
-                        'function'    => 'lineElements',
-                        'argument'    => $matches[1],
-                        'destination' => 'elements',
-                    ],
-                ],
-            ];
+        if ($Excerpt['text'][1] !== '~') {
+            return;
         }
+        if (!\preg_match('#^~~(?=\S)(.+?)(?<=\S)~~#', $Excerpt['text'], $matches)) {
+            return;
+        }
+        return [
+            'extent'  => \strlen($matches[0]),
+            'element' => [
+                'name'    => 'del',
+                'handler' => [
+                    'function'    => 'lineElements',
+                    'argument'    => $matches[1],
+                    'destination' => 'elements',
+                ],
+            ],
+        ];
     }
 
     protected function inlineUrl($Excerpt)
     {
-        if ($this->urlsLinked !== true || ! isset($Excerpt['text'][2]) || $Excerpt['text'][2] !== '/') {
+        if ($this->urlsLinked !== true) {
             return;
         }
-
+        if (! isset($Excerpt['text'][2])) {
+            return;
+        }
+        if ($Excerpt['text'][2] !== '/') {
+            return;
+        }
         if (\str_contains($Excerpt['context'], 'http') && \preg_match('#\bhttps?+:[\/]{2}[^\s<]+\b\/*+#ui', $Excerpt['context'], $matches, PREG_OFFSET_CAPTURE)
         ) {
             $url = $matches[0][0];

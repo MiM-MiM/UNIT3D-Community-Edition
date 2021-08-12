@@ -48,8 +48,13 @@ class Http2ServerPush
     public function handle(Request $request, Closure $next, $limit = null, $sizeLimit = null, $excludeKeywords = null)
     {
         $response = $next($request);
-
-        if ($response->isRedirection() || ! $response instanceof Response || $request->isJson()) {
+        if ($response->isRedirection()) {
+            return $response;
+        }
+        if (! $response instanceof Response) {
+            return $response;
+        }
+        if ($request->isJson()) {
             return $response;
         }
 

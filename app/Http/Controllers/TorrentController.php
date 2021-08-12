@@ -487,8 +487,11 @@ class TorrentController extends Controller
             return \redirect()->route('upload_form', ['category_id' => $category->id])
                 ->withErrors('You Must Provide A Torrent File For Upload!')->withInput();
         }
-
-        if ($requestFile->getError() != 0 || $requestFile->getClientOriginalExtension() != 'torrent') {
+        if ($requestFile->getError() != 0) {
+            return \redirect()->route('upload_form', ['category_id' => $category->id])
+                ->withErrors('You Must Provide A Valid Torrent File For Upload!')->withInput();
+        }
+        if ($requestFile->getClientOriginalExtension() != 'torrent') {
             return \redirect()->route('upload_form', ['category_id' => $category->id])
                 ->withErrors('You Must Provide A Valid Torrent File For Upload!')->withInput();
         }

@@ -131,10 +131,15 @@ class Group extends Model
      */
     public function isAllowed($object, $groupId)
     {
-        if (\is_array($object) && \is_array($object['default_groups']) && \array_key_exists($groupId, $object['default_groups'])) {
-            return $object['default_groups'][$groupId] == 1;
+        if (!\is_array($object)) {
+            return true;
         }
-
-        return true;
+        if (!\is_array($object['default_groups'])) {
+            return true;
+        }
+        if (!\array_key_exists($groupId, $object['default_groups'])) {
+            return true;
+        }
+        return $object['default_groups'][$groupId] == 1;
     }
 }

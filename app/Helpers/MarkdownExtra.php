@@ -123,10 +123,12 @@ class MarkdownExtra extends Markdown
 
     protected function blockDefinitionList($Line, $Block)
     {
-        if (! isset($Block) || $Block['type'] !== 'Paragraph') {
+        if (! isset($Block)) {
             return;
         }
-
+        if ($Block['type'] !== 'Paragraph') {
+            return;
+        }
         $Element = [
             'name'     => 'dl',
             'elements' => [],
@@ -199,10 +201,12 @@ class MarkdownExtra extends Markdown
 
     protected function blockMarkup($Line)
     {
-        if ($this->markupEscaped || $this->safeMode) {
+        if ($this->markupEscaped) {
             return;
         }
-
+        if ($this->safeMode) {
+            return;
+        }
         if (\preg_match('/^<(\w[\w-]*)(?:[ ]*'.$this->regexHtmlAttribute.')*[ ]*(\/)?>/', $Line['text'], $matches)) {
             $element = \strtolower($matches[1]);
 
@@ -228,7 +232,10 @@ class MarkdownExtra extends Markdown
                     $Block['void'] = true;
                 }
             } else {
-                if (isset($matches[2]) || \in_array($matches[1], $this->voidElements)) {
+                if (isset($matches[2])) {
+                    return;
+                }
+                if (\in_array($matches[1], $this->voidElements)) {
                     return;
                 }
                 if (\preg_match('/<\/'.$matches[1].'>[ ]*$/i', $remainder)) {

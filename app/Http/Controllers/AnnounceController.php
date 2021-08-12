@@ -360,9 +360,13 @@ class AnnounceController extends Controller
             ->pluck('updated_at');
 
         $carbon = new Carbon();
-        if ($prevAnnounce < $carbon->copy()->subSeconds(self::MIN)->toDateTimeString() && \strtolower($queries['event']) !== 'completed') {
-            throw new TrackerException(162, [':min' => self::MIN]);
+        if ($prevAnnounce >= $carbon->copy()->subSeconds(self::MIN)->toDateTimeString()) {
+            return;
         }
+        if (\strtolower($queries['event']) === 'completed') {
+            return;
+        }
+        throw new TrackerException(162, [':min' => self::MIN]);
     }
 
     /**

@@ -313,8 +313,11 @@ class BonusController extends Controller
 
         if ($v->passes()) {
             $recipient = User::where('username', '=', $request->input('to_username'))->first();
-
-            if (! $recipient || $recipient->id == $user->id) {
+            if (! $recipient) {
+                return \redirect()->route('bonus_store')
+                    ->withErrors('Unable to find specified user');
+            }
+            if ($recipient->id == $user->id) {
                 return \redirect()->route('bonus_store')
                     ->withErrors('Unable to find specified user');
             }
@@ -360,8 +363,11 @@ class BonusController extends Controller
         ]);
         if ($v->passes()) {
             $recipient = User::where('username', 'LIKE', $request->input('to_username'))->first();
-
-            if (! $recipient || $recipient->id == $user->id) {
+            if (! $recipient) {
+                return \redirect()->route('bonus_store')
+                    ->withErrors('Unable to find specified user');
+            }
+            if ($recipient->id == $user->id) {
                 return \redirect()->route('bonus_store')
                     ->withErrors('Unable to find specified user');
             }

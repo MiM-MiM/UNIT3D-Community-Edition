@@ -168,7 +168,10 @@ class VendorCleanup extends Command
      */
     protected function delTree($dir)
     {
-        if (! \file_exists($dir) || ! \is_dir($dir)) {
+        if (! \file_exists($dir)) {
+            return false;
+        }
+        if (! \is_dir($dir)) {
             return false;
         }
         $iterator = new RecursiveIteratorIterator(

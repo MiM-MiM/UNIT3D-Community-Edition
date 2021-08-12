@@ -99,8 +99,10 @@ class SystemBot
         ]);
         if ($v->passes()) {
             $recipient = User::where('username', 'LIKE', $receiver)->first();
-
-            if (! $recipient || $recipient->id == $this->target->id) {
+            if (! $recipient) {
+                return 'Your BON gift could not be sent.';
+            }
+            if ($recipient->id == $this->target->id) {
                 return 'Your BON gift could not be sent.';
             }
 

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * NOTICE OF LICENSE.
  *
@@ -109,10 +110,13 @@ if (! function_exists('rating_color')) {
         if ($number >= 4 && $number <= 6.9) {
             return 'text-warning';
         }
-
-        if ($number >= 7 && $number <= 10) {
-            return 'text-success';
+        if ($number < 7) {
+            return;
         }
+        if ($number > 10) {
+            return;
+        }
+        return 'text-success';
     }
 }
 if (! function_exists('language_flag')) {

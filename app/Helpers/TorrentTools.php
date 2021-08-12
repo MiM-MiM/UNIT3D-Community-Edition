@@ -72,11 +72,13 @@ class TorrentTools
     public static function getFileCount($decodedTorrent)
     {
         // Multiple file torrent ?
-        if (\array_key_exists('files', $decodedTorrent['info']) && (\is_countable($decodedTorrent['info']['files']) ? \count($decodedTorrent['info']['files']) : 0)) {
-            return \is_countable($decodedTorrent['info']['files']) ? \count($decodedTorrent['info']['files']) : 0;
+        if (!\array_key_exists('files', $decodedTorrent['info'])) {
+            return 1;
         }
-
-        return 1;
+        if (!(\is_countable($decodedTorrent['info']['files']) ? \count($decodedTorrent['info']['files']) : 0)) {
+            return 1;
+        }
+        return \is_countable($decodedTorrent['info']['files']) ? \count($decodedTorrent['info']['files']) : 0;
     }
 
     /**
@@ -220,14 +222,18 @@ class TorrentTools
      */
     public static function isValidFilename($filename)
     {
-        $result = true;
-        if (\strlen($filename) > 255 ||
-            \preg_match('#[/?<>\\:*|"\x00-\x1f]#', $filename) ||
-            \preg_match('#(^\.+|[\. ]+)$#', $filename) ||
-            \preg_match('#^(con|prn|aux|nul|com\d|lpt\d)(\..*)?$#i', $filename)) {
-            $result = false;
+        if (\strlen($filename) > 255) {
+            return false;
         }
-
-        return $result;
+        if (\preg_match('#[/?<>\\:*|"\x00-\x1f]#', $filename)) {
+            return false;
+        }
+        if (\preg_match('#(^\.+|[\. ]+)$#', $filename)) {
+            return false;
+        }
+        if (\preg_match('#^(con|prn|aux|nul|com\d|lpt\d)(\..*)?$#i', $filename)) {
+            return false;
+        }
+        return true;
     }
 }

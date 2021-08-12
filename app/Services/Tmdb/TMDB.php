@@ -40,11 +40,13 @@ class TMDB
 
     public function ifExists($type, $array)
     {
-        if (isset($array[$type]) && ! empty($array[$type])) {
-            return $array[$type];
+        if (!isset($array[$type])) {
+            return null;
         }
-
-        return null;
+        if (empty($array[$type])) {
+            return null;
+        }
+        return $array[$type];
     }
 
     public function cast_array($cast)

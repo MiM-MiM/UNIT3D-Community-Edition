@@ -20,7 +20,10 @@ class Bencode
     public static function parse_integer($s, &$pos)
     {
         $len = \strlen($s);
-        if ($len === 0 || $s[$pos] != 'i') {
+        if ($len === 0) {
+            return;
+        }
+        if ($s[$pos] != 'i') {
             return;
         }
         $pos++;
@@ -109,7 +112,10 @@ class Bencode
             while ($pos < $len && $s[$pos] != 'e') {
                 $key = self::bdecode($s, $pos);
                 $value = self::bdecode($s, $pos);
-                if (\is_null($key) || \is_null($value)) {
+                if (\is_null($key)) {
+                    return;
+                }
+                if (\is_null($value)) {
                     return;
                 }
                 $dict[$key] = $value;
@@ -186,7 +192,10 @@ class Bencode
         if (\is_string($d)) {
             return \strlen($d).':'.$d;
         }
-        if (\is_int($d) || \is_float($d)) {
+        if (\is_int($d)) {
+            return \sprintf('i%de', $d);
+        }
+        if (\is_float($d)) {
             return \sprintf('i%de', $d);
         }
     }

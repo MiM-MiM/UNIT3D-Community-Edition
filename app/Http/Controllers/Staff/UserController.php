@@ -104,10 +104,16 @@ class UserController extends Controller
         if ($sender == 1 && $staff->group->id == 10) {
             $sender = 2;
         }
-
         // Hard coded until group change.
-
-        if ($target >= $sender || ($sender == 0 && ($sendto === 6 || $sendto === 4 || $sendto === 10)) || ($sender == 1 && ($sendto === 4 || $sendto === 10))) {
+        if ($target >= $sender) {
+            return \redirect()->route('users.show', ['username' => $user->username])
+                ->withErrors('You Are Not Authorized To Perform This Action!');
+        }
+        if ($sender == 0 && ($sendto === 6 || $sendto === 4 || $sendto === 10)) {
+            return \redirect()->route('users.show', ['username' => $user->username])
+                ->withErrors('You Are Not Authorized To Perform This Action!');
+        }
+        if ($sender == 1 && ($sendto === 4 || $sendto === 10)) {
             return \redirect()->route('users.show', ['username' => $user->username])
                 ->withErrors('You Are Not Authorized To Perform This Action!');
         }

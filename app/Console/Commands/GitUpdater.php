@@ -324,9 +324,13 @@ class GitUpdater extends Command
 
     private function validatePath($path)
     {
-        if (! \is_file(\base_path($path)) && ! \is_dir(\base_path($path))) {
-            $this->red(\sprintf("The path '%s' is invalid", $path));
+        if (\is_file(\base_path($path))) {
+            return;
         }
+        if (\is_dir(\base_path($path))) {
+            return;
+        }
+        $this->red(\sprintf("The path '%s' is invalid", $path));
     }
 
     private function createBackupPath($path)
@@ -337,10 +341,17 @@ class GitUpdater extends Command
             }
         } elseif (\is_file(\base_path($path)) && \dirname($path) !== '.') {
             $path = \dirname($path);
-            if (! \is_dir(\storage_path(\sprintf('gitupdate/%s', $path))) && ! \mkdir($concurrentDirectory = \storage_path(\sprintf('gitupdate/%s',
-                    $path)), 0775, true) && ! \is_dir($concurrentDirectory)) {
-                throw new \RuntimeException(\sprintf('Directory "%s" was not created', $concurrentDirectory));
+            if (\is_dir(\storage_path(\sprintf('gitupdate/%s', $path)))) {
+                return;
             }
+            if (\mkdir($concurrentDirectory = \storage_path(\sprintf('gitupdate/%s',
+                    $path)), 0775, true)) {
+                return;
+            }
+            if (\is_dir($concurrentDirectory)) {
+                return;
+            }
+            throw new \RuntimeException(\sprintf('Directory "%s" was not created', $concurrentDirectory));
         }
     }
 

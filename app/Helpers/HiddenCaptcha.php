@@ -58,20 +58,27 @@ class HiddenCaptcha
     public static function check(Validator $validator, $minLimit = 0, $maxLimit = 1_200)
     {
         $formData = $validator->getData();
-
         // Check post values
-        if (! isset($formData['_captcha']) || ! ($token = self::getToken($formData['_captcha']))) {
+        if (! isset($formData['_captcha'])) {
             return false;
         }
-
+        if (! ($token = self::getToken($formData['_captcha']))) {
+            return false;
+        }
         // Hidden "must be empty" field check
-        if (! \array_key_exists($token['must_be_empty'], $formData) || ! empty($formData[$token['must_be_empty']])) {
+        if (! \array_key_exists($token['must_be_empty'], $formData)) {
+            return false;
+        }
+        if (! empty($formData[$token['must_be_empty']])) {
             return false;
         }
 
         // Check time limits
         $now = \time();
-        if ($now - $token['timestamp'] < $minLimit || $now - $token['timestamp'] > $maxLimit) {
+        if ($now - $token['timestamp'] < $minLimit) {
+            return false;
+        }
+        if ($now - $token['timestamp'] > $maxLimit) {
             return false;
         }
 
@@ -101,20 +108,33 @@ class HiddenCaptcha
         }
 
         $token = @\unserialize($token);
-
         // Token is null or unserializable
-        if (! $token || ! \is_array($token) || empty($token)) {
+        if (! $token) {
             return false;
         }
-
+        if (! \is_array($token)) {
+            return false;
+        }
+        if (empty($token)) {
+            return false;
+        }
         // Check token values
-        if (empty($token['session_id']) ||
-            empty($token['ip']) ||
-            empty($token['user_agent']) ||
-            $token['session_id'] !== \session()->getId() ||
-            $token['ip'] !== \request()->ip() ||
-            $token['user_agent'] !== \request()->header('User-Agent')
-        ) {
+        if (empty($token['session_id'])) {
+            return false;
+        }
+        if (empty($token['ip'])) {
+            return false;
+        }
+        if (empty($token['user_agent'])) {
+            return false;
+        }
+        if ($token['session_id'] !== \session()->getId()) {
+            return false;
+        }
+        if ($token['ip'] !== \request()->ip()) {
+            return false;
+        }
+        if ($token['user_agent'] !== \request()->header('User-Agent')) {
             return false;
         }
 

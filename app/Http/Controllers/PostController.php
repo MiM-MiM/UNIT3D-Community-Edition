@@ -56,9 +56,12 @@ class PostController extends Controller
         $topic = Topic::findOrFail($id);
         $forum = $topic->forum;
         $category = $forum->getCategory();
-
         // The user has the right to create a post here?
-        if (! $category->getPermission()->reply_topic || ($topic->state == 'close' && ! $request->user()->group->is_modo)) {
+        if (! $category->getPermission()->reply_topic) {
+            return \redirect()->route('forums.index')
+                ->withErrors('You Cannot Reply To This Topic!');
+        }
+        if ($topic->state == 'close' && ! $request->user()->group->is_modo) {
             return \redirect()->route('forums.index')
                 ->withErrors('You Cannot Reply To This Topic!');
         }

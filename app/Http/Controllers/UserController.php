@@ -1197,9 +1197,13 @@ class UserController extends Controller
                 if ($request->has('mvp_seeder') && $request->input('mvp_seeder') != null) {
                     $query->orWhereRaw('(history.active = 1 AND history.seedtime > (2592000 * 6) and history.seedtime < (2592000 * 12))', []);
                 }
-                if ($request->has('legendary_seeder') && $request->input('legendary_seeder') != null) {
-                    $query->orWhereRaw('(history.active = 1 AND history.seedtime > (2592000 * 12))', []);
+                if (!$request->has('legendary_seeder')) {
+                    return;
                 }
+                if ($request->input('legendary_seeder') == null) {
+                    return;
+                }
+                $query->orWhereRaw('(history.active = 1 AND history.seedtime > (2592000 * 12))', []);
             });
             if ($request->has('name') && $request->input('name') != null) {
                 $history->where('torrents.name', 'like', '%'.$request->input('name').'%');
@@ -1441,9 +1445,13 @@ class UserController extends Controller
                 if ($request->has('satisfied') && $request->input('satisfied') != null) {
                     $query->orWhereRaw('(history.seedtime >= ? or history.immune = 1)', [\config('hitrun.seedtime')]);
                 }
-                if ($request->has('notsatisfied') && $request->input('notsatisfied') != null) {
-                    $query->orWhereRaw('(history.seedtime < ? and history.immune != 1)', [\config('hitrun.seedtime')]);
+                if (!$request->has('notsatisfied')) {
+                    return;
                 }
+                if ($request->input('notsatisfied') == null) {
+                    return;
+                }
+                $query->orWhereRaw('(history.seedtime < ? and history.immune != 1)', [\config('hitrun.seedtime')]);
             });
             if ($request->has('name') && $request->input('name') != null) {
                 $history->where('torrents.name', 'like', '%'.$request->input('name').'%');
@@ -1496,13 +1504,10 @@ class UserController extends Controller
                 'downloads' => $table,
             ])->render();
         }
-
         if ($request->has('view') && $request->input('view') == 'uploads') {
             $history = Torrent::selectRaw('distinct(torrents.id),max(torrents.moderated_at) as moderated_at,max(torrents.slug) as slug,max(torrents.user_id) as user_id,max(torrents.name) as name,max(torrents.category_id) as category_id,max(torrents.size) as size,max(torrents.leechers) as leechers,max(torrents.seeders) as seeders,max(torrents.times_completed) as times_completed,max(torrents.created_at) as created_at,max(torrents.status) as status,count(distinct thanks.id) as thanked_total,max(bt.tipped_total) as tipped_total')->withAnyStatus()->where('torrents.user_id', '=', $user->id)->with(['tips', 'thanks'])->leftJoin(DB::raw('(select distinct(bon_transactions.torrent_id),sum(bon_transactions.cost) as tipped_total from bon_transactions group by bon_transactions.torrent_id) as bt'), 'bt.torrent_id', '=', 'torrents.id')->leftJoin('thanks', 'thanks.torrent_id', 'torrents.id')->groupBy('torrents.id');
-
             $order = null;
             $sorting = null;
-
             if ($request->has('pending') && $request->input('pending') != null) {
                 $history->whereRaw('(torrents.status) = ?', [0]);
             }
@@ -1512,7 +1517,6 @@ class UserController extends Controller
             if ($request->has('rejected') && $request->input('rejected') != null) {
                 $history->whereRaw('(torrents.status) = ?', [2]);
             }
-
             $history->where(function ($query) use ($request) {
                 if ($request->has('dead') && $request->input('dead') != null) {
                     $query->orWhereRaw('(torrents.seeders+torrents.leechers) = ?', [0]);
@@ -1523,11 +1527,14 @@ class UserController extends Controller
                 if ($request->has('reseed') && $request->input('reseed') != null) {
                     $query->orWhereRaw('(torrents.seeders = ?) AND (torrents.leechers >= ?)', [0, 1]);
                 }
-                if ($request->has('error') && $request->input('error') != null) {
-                    $query->orWhereRaw('(torrents.seeders = ?) AND (torrents.leechers = ?)', [0, 0]);
+                if (!$request->has('error')) {
+                    return;
                 }
+                if ($request->input('error') == null) {
+                    return;
+                }
+                $query->orWhereRaw('(torrents.seeders = ?) AND (torrents.leechers = ?)', [0, 0]);
             });
-
             if ($request->has('name') && $request->input('name') != null) {
                 $history->where('torrents.name', 'like', '%'.$request->input('name').'%');
             }
@@ -1543,22 +1550,21 @@ class UserController extends Controller
                 // $order = 'asc';
             }
             $direction = $order == 'asc' ? 1 : 2;
-
             if ($sorting == 'tipped' || $sorting == 'thanked') {
                 $table = $history->orderBy($sorting.'_total', $order)->paginate(50);
             } else {
                 $table = $history->orderBy($sorting, $order)->paginate(50);
             }
-
             return \view('user.filters.uploads', [
                 'user'    => $user,
                 'uploads' => $table,
             ])->render();
-        } elseif ($request->has('view') && $request->input('view') == 'history') {
+        }
+
+        if ($request->has('view') && $request->input('view') == 'history') {
             $history = History::with(['torrent' => function ($query) {
                 $query->withAnyStatus();
             }])->selectRaw('distinct(history.id),max(history.info_hash) as info_hash,max(history.agent) as agent,max(history.uploaded) as uploaded,max(history.downloaded) as downloaded,max(history.seeder) as seeder,max(history.active) as active,max(history.actual_uploaded) as actual_uploaded,max(history.actual_downloaded) as actual_downloaded,max(history.seedtime) as seedtime,max(history.created_at) as created_at,max(history.updated_at) as updated_at,max(history.completed_at) as completed_at,max(history.immune) as immune,max(history.hitrun) as hitrun,max(history.prewarn) as prewarn,max(torrents.moderated_at) as moderated_at,max(torrents.slug) as slug,max(torrents.user_id) as user_id,max(torrents.name) as name,max(torrents.category_id) as category_id,max(torrents.size) as size,max(torrents.leechers) as leechers,max(torrents.seeders) as seeders,max(torrents.times_completed) as times_completed,max(torrents.status) as status')->leftJoin('torrents', 'torrents.info_hash', '=', 'history.info_hash')->groupBy('history.id');
-
             $order = null;
             $sorting = null;
             if ($request->has('sorting') && $request->input('sorting') != null) {
@@ -1573,37 +1579,28 @@ class UserController extends Controller
                 // $order = 'asc';
             }
             $direction = $order == 'asc' ? 1 : 2;
-
             if ($request->has('name') && $request->input('name') != null) {
                 $history->where('torrents.name', 'like', '%'.$request->input('name').'%');
             }
-
             if ($request->has('completed') && $request->input('completed') != null) {
                 $history->where('completed_at', '>', 0);
             }
-
             if ($request->has('active') && $request->input('active') != null) {
                 $history->where('active', '=', 1);
             }
-
             if ($request->has('seeding') && $request->input('seeding') != null) {
                 $history->where('seeder', '=', 1);
             }
-
             if ($request->has('prewarned') && $request->input('prewarned') != null) {
                 $history->where('prewarn', '=', 1);
             }
-
             if ($request->has('hr') && $request->input('hr') != null) {
                 $history->where('hitrun', '=', 1);
             }
-
             if ($request->has('immune') && $request->input('immune') != null) {
                 $history->where('immune', '=', 1);
             }
-
             $table = $history->where('history.user_id', '=', $user->id)->orderBy($sorting, $order)->paginate(50);
-
             return \view('user.filters.history', [
                 'user'    => $user,
                 'history' => $table,

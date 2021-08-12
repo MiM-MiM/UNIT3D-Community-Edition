@@ -8,9 +8,9 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
 return static function (ContainerConfigurator $containerConfigurator): void {
     // here we can define, what sets of rules will be applied
     // tip: use "SetList" class to autocomplete sets
-    // $containerConfigurator->import(SetList::CODING_STYLE);
+    $containerConfigurator->import(SetList::EARLY_RETURN);
 
     // register single rule
-    $services = $containerConfigurator->services();
-    $services->set(Rector\CodingStyle\Rector\Catch_\CatchExceptionNameMatchingTypeRector ::class);
+    // $services = $containerConfigurator->services();
+    // $services->set(Rector\CodingStyle\Rector\Catch_\CatchExceptionNameMatchingTypeRector ::class);
 };

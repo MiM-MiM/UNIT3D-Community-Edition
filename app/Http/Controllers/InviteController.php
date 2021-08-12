@@ -57,12 +57,14 @@ class InviteController extends Controller
             return \redirect()->route('home.index')
             ->withErrors('Your Invite Rights Have Been Revoked!');
         }
-        if (\config('other.invites_restriced') == true && ! \in_array($user->group->name, \config('other.invite_groups'), true)) {
-            return \redirect()->route('home.index')
-                ->withErrors('Invites are currently disabled for your group.');
+        if (\config('other.invites_restriced') != true) {
+            return \view('user.invite', ['user' => $user, 'route' => 'invite']);
         }
-
-        return \view('user.invite', ['user' => $user, 'route' => 'invite']);
+        if (\in_array($user->group->name, \config('other.invite_groups'), true)) {
+            return \view('user.invite', ['user' => $user, 'route' => 'invite']);
+        }
+        return \redirect()->route('home.index')
+            ->withErrors('Invites are currently disabled for your group.');
     }
 
     /**

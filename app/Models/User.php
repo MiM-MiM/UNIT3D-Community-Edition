@@ -608,7 +608,10 @@ class User extends Authenticatable
         if ($sender->id === $target->id) {
             return false;
         }
-        if ($sender->group->is_modo || $sender->group->is_admin) {
+        if ($sender->group->is_modo) {
+            return true;
+        }
+        if ($sender->group->is_admin) {
             return true;
         }
         if ($target->block_notifications && $target->block_notifications == 1) {
@@ -643,7 +646,10 @@ class User extends Authenticatable
         if ($sender->id == $target->id) {
             return true;
         }
-        if ($sender->group->is_modo || $sender->group->is_admin) {
+        if ($sender->group->is_modo) {
+            return true;
+        }
+        if ($sender->group->is_admin) {
             return true;
         }
         if ($target->hidden && $target->hidden == 1) {
@@ -678,7 +684,10 @@ class User extends Authenticatable
         if ($sender->id == $target->id) {
             return true;
         }
-        if ($sender->group->is_modo || $sender->group->is_admin) {
+        if ($sender->group->is_modo) {
+            return true;
+        }
+        if ($sender->group->is_admin) {
             return true;
         }
         if ($target->private_profile && $target->private_profile == 1) {
